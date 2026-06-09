@@ -164,10 +164,10 @@ Architecture: pure analytics logic lives in `src-tauri/src/analytics/` and
 The Tauri layer (`commands`, `state`, `refresher`, `watcher`) orchestrates it and pushes
 `usage://update` events to the frontend.
 
-**Contributor guide:** see [`CLAUDE.md`](CLAUDE.md) for the architecture map, conventions,
-and change recipes. (If you use Claude Code, local project-workflow skills live under
-`.claude/skills/` — `ctm-dev`, `ctm-add-metric`, `ctm-release` — they are not published to
-the repo.)
+**Contributor note:** the architecture summary above covers the essentials. If you use
+Claude Code, local project config (`CLAUDE.md` plus `.claude/skills/` — `ctm-dev`,
+`ctm-add-metric`, `ctm-release`) adds the full architecture map, conventions, and
+workflows. These are kept local and intentionally not published to the repo.
 
 ---
 

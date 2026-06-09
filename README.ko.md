@@ -160,9 +160,10 @@ npm run build                                      # 타입 체크 + 프론트�
 (`commands`, `state`, `refresher`, `watcher`)가 이를 오케스트레이션하고 프론트엔드로
 `usage://update` 이벤트를 푸시합니다.
 
-**컨트리뷰터 가이드:** 아키텍처 맵·컨벤션·변경 레시피는 [`CLAUDE.md`](CLAUDE.md) 를
-참고하세요. (Claude Code 사용자는 로컬 `.claude/skills/` 의 프로젝트 워크플로 스킬 —
-`ctm-dev`, `ctm-add-metric`, `ctm-release` — 을 활용할 수 있습니다. 저장소에는 게시되지 않습니다.)
+**컨트리뷰터 안내:** 위 아키텍처 요약으로 핵심은 파악할 수 있습니다. Claude Code 사용자는
+로컬 프로젝트 설정(`CLAUDE.md` 및 `.claude/skills/` — `ctm-dev`, `ctm-add-metric`,
+`ctm-release`)에서 전체 아키텍처 맵·컨벤션·워크플로를 확인할 수 있습니다. 이들은
+로컬에만 유지되며 의도적으로 저장소에는 게시하지 않습니다.
 
 ---
 
