@@ -1,5 +1,7 @@
 # Claude Token Monitor
 
+**English** | [한국어](README.ko.md)
+
 > A tiny, always-on-top desktop overlay that shows how much of your **Claude Code**
 > token quota remains — at a glance, without running `/usage` in the terminal.
 
