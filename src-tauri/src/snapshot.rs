@@ -29,6 +29,57 @@ fn merge_window(
     }
 }
 
+/// Carry one authoritative API window onto a fresh local snapshot: keep the
+/// API's percent/reset/`estimated=false`, but adopt the fresh JSONL token count
+/// and recompute the countdown against `now`.
+fn carry_window(
+    api_win: WindowStatus,
+    fresh_tokens: Option<u64>,
+    now: DateTime<Utc>,
+) -> WindowStatus {
+    let remaining_secs = match api_win.resets_at {
+        Some(r) => (r - now).num_seconds().max(0),
+        None => 0,
+    };
+    WindowStatus {
+        remaining_secs,
+        tokens_used: fresh_tokens.or(api_win.tokens_used),
+        ..api_win
+    }
+}
+
+/// Overlay the previous snapshot's authoritative API window values onto a
+/// freshly-built JSONL-only snapshot. This lets the file-watcher refresh update
+/// tokens/cost/burn instantly without regressing the gauges to local estimates
+/// between API polls. Token counts stay fresh; percent + reset come from the API.
+///
+/// No-op when the previous snapshot's windows were themselves estimated (i.e. the
+/// API has not produced an authoritative value yet) — honest local estimates win.
+pub fn carry_authoritative_windows(
+    mut fresh: UsageSnapshot,
+    prev: &UsageSnapshot,
+    now: DateTime<Utc>,
+) -> UsageSnapshot {
+    if prev.five_hour.estimated {
+        return fresh;
+    }
+    fresh.five_hour = carry_window(prev.five_hour.clone(), fresh.five_hour.tokens_used, now);
+    fresh.seven_day = carry_window(prev.seven_day.clone(), fresh.seven_day.tokens_used, now);
+    fresh.seven_day_opus = prev
+        .seven_day_opus
+        .clone()
+        .map(|w| carry_window(w, None, now));
+    fresh.seven_day_sonnet = prev
+        .seven_day_sonnet
+        .clone()
+        .map(|w| carry_window(w, None, now));
+    fresh.source = DataSource::Hybrid;
+    fresh
+        .warnings
+        .retain(|w| !w.contains("Usage API unavailable"));
+    fresh
+}
+
 #[allow(clippy::too_many_arguments)]
 pub fn build(
     events: &[UsageEvent],
@@ -230,6 +281,107 @@ mod tests {
         assert!(!snap.five_hour.estimated);
         assert_eq!(snap.five_hour.percent_used, 80.0); // API value, not 50
         assert_eq!(snap.five_hour.tokens_used, Some(50)); // JSONL token count kept
+    }
+
+    /// Build an authoritative (API) snapshot, then a fresh local one, mimicking
+    /// the timer-then-watcher sequence at runtime.
+    fn authoritative_then_local() -> (UsageSnapshot, UsageSnapshot) {
+        let events = vec![ev("2026-06-09T01:00:00Z", "claude-opus-4-6", 50)];
+        let limits = PlanLimits {
+            five_hour_tokens: 100, // tiny ceiling so the local estimate is wildly high
+            seven_day_tokens: 1000,
+        };
+        let api = UsageApiResponse {
+            five_hour: Some(WindowUtil {
+                utilization: 6.0,
+                resets_at: Some(at("2026-06-09T06:00:00Z")),
+            }),
+            seven_day: Some(WindowUtil {
+                utilization: 11.0,
+                resets_at: Some(at("2026-06-11T00:00:00Z")),
+            }),
+            seven_day_sonnet: Some(WindowUtil {
+                utilization: 1.0,
+                resets_at: Some(at("2026-06-10T00:00:00Z")),
+            }),
+            ..Default::default()
+        };
+        let now = at("2026-06-09T02:00:00Z");
+        let prev = build(&events, Some(&api), PlanTier::Max5x, limits, 0, None, now);
+        // A bit later, more tokens, no API (watcher path).
+        let later = vec![
+            ev("2026-06-09T01:00:00Z", "claude-opus-4-6", 50),
+            ev("2026-06-09T02:30:00Z", "claude-opus-4-6", 40),
+        ];
+        let fresh = build(
+            &later,
+            None,
+            PlanTier::Max5x,
+            limits,
+            0,
+            None,
+            at("2026-06-09T03:00:00Z"),
+        );
+        (prev, fresh)
+    }
+
+    #[test]
+    fn carry_keeps_authoritative_percent_with_fresh_tokens() {
+        let (prev, fresh) = authoritative_then_local();
+        assert!(
+            fresh.five_hour.estimated,
+            "precondition: local is estimated"
+        );
+        let fresh_tokens = fresh.five_hour.tokens_used;
+
+        let out = carry_authoritative_windows(fresh, &prev, at("2026-06-09T03:00:00Z"));
+
+        assert_eq!(out.five_hour.percent_used, 6.0); // authoritative, not the 100% estimate
+        assert!(!out.five_hour.estimated);
+        assert_eq!(out.five_hour.tokens_used, fresh_tokens); // fresh JSONL count kept
+        assert_eq!(out.seven_day.percent_used, 11.0);
+        assert_eq!(out.source, DataSource::Hybrid);
+        assert!(
+            !out.warnings
+                .iter()
+                .any(|w| w.contains("Usage API unavailable")),
+            "api-unavailable warning must be dropped"
+        );
+    }
+
+    #[test]
+    fn carry_recomputes_remaining_secs_against_now() {
+        let (prev, fresh) = authoritative_then_local();
+        // reset at 06:00, now 03:00 -> 3h remaining
+        let out = carry_authoritative_windows(fresh, &prev, at("2026-06-09T03:00:00Z"));
+        assert_eq!(out.five_hour.remaining_secs, 3 * 3600);
+    }
+
+    #[test]
+    fn carry_propagates_per_model_windows() {
+        let (prev, fresh) = authoritative_then_local();
+        let out = carry_authoritative_windows(fresh, &prev, at("2026-06-09T03:00:00Z"));
+        assert_eq!(
+            out.seven_day_sonnet.as_ref().map(|w| w.percent_used),
+            Some(1.0)
+        );
+    }
+
+    #[test]
+    fn carry_is_noop_when_prev_estimated() {
+        // prev built without API -> estimated windows; nothing authoritative to carry.
+        let events = vec![ev("2026-06-09T01:00:00Z", "claude-opus-4-6", 50)];
+        let limits = PlanLimits {
+            five_hour_tokens: 100,
+            seven_day_tokens: 1000,
+        };
+        let now = at("2026-06-09T02:00:00Z");
+        let prev = build(&events, None, PlanTier::Max5x, limits, 0, None, now);
+        let fresh = build(&events, None, PlanTier::Max5x, limits, 0, None, now);
+        let out = carry_authoritative_windows(fresh, &prev, now);
+        assert!(out.five_hour.estimated);
+        assert_eq!(out.source, DataSource::Jsonl);
+        assert!(out.warnings.iter().any(|w| w.contains("estimates")));
     }
 
     #[test]

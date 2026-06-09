@@ -57,8 +57,10 @@ impl AppState {
     }
 
     /// Build a snapshot from JSONL only (no API call). Used by the file watcher
-    /// so frequent transcript writes don't hammer the rate-limited endpoint;
-    /// the authoritative percentages refresh on the timer instead.
+    /// so frequent transcript writes don't hammer the rate-limited endpoint.
+    /// The last authoritative API window percentages/resets are carried over so
+    /// the gauges don't regress to local estimates between timer polls; only
+    /// tokens/cost/burn refresh from the fresh JSONL.
     pub async fn build_snapshot_local(&self) -> UsageSnapshot {
         self.build_snapshot_inner(false).await
     }
@@ -101,6 +103,20 @@ impl AppState {
             settings.context_limit_override,
             now,
         );
+
+        // On the local (no-API) path, keep the last authoritative gauge values
+        // rather than overwriting them with local estimates. Clone the cached
+        // snapshot out first so the lock is released before the overlay (the
+        // std Mutex is not reentrant).
+        let snap = if !allow_api {
+            let prev = self.last_snapshot.lock().unwrap().clone();
+            match prev {
+                Some(p) => snapshot::carry_authoritative_windows(snap, &p, now),
+                None => snap,
+            }
+        } else {
+            snap
+        };
 
         *self.last_snapshot.lock().unwrap() = Some(snap.clone());
         snap
