@@ -116,6 +116,22 @@ pub struct BurnStats {
     pub seven_day_eta: Option<DateTime<Utc>>,
 }
 
+/// Context-window occupancy for the currently active session.
+#[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ContextStatus {
+    /// Tokens currently occupying the model's context window.
+    pub used: u64,
+    /// The model's context window size.
+    pub limit: u64,
+    /// 0.0 – 100.0
+    pub percent_used: f64,
+    /// Tokens of context still available.
+    pub remaining: u64,
+    /// Model of the active session.
+    pub model: String,
+}
+
 /// Cost breakdown in USD.
 #[derive(Debug, Clone, Default, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -141,6 +157,8 @@ pub struct UsageSnapshot {
     pub per_model: Vec<ModelUsage>,
     pub burn: BurnStats,
     pub cost: CostStats,
+    /// Context-window occupancy of the active session (None if no activity).
+    pub context: Option<ContextStatus>,
     /// Non-fatal warnings (e.g. parse failures, API unavailable).
     pub warnings: Vec<String>,
 }

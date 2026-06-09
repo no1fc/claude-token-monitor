@@ -29,12 +29,14 @@ fn merge_window(
     }
 }
 
+#[allow(clippy::too_many_arguments)]
 pub fn build(
     events: &[UsageEvent],
     api: Option<&UsageApiResponse>,
     tier: PlanTier,
     limits: PlanLimits,
     parse_failures: usize,
+    context_limit_override: Option<u64>,
     now: DateTime<Utc>,
 ) -> UsageSnapshot {
     let active = active_block(events, now);
@@ -140,6 +142,7 @@ pub fn build(
         current_session: session,
         per_model: per_model_list,
         burn,
+        context: crate::analytics::context::current_context(events, context_limit_override),
         cost: CostStats {
             session_usd: session_cost,
             five_hour_usd: session_cost,
@@ -186,6 +189,7 @@ mod tests {
             PlanTier::Max5x,
             limits,
             0,
+            None,
             at("2026-06-09T02:00:00Z"),
         );
         assert_eq!(snap.source, DataSource::Jsonl);
@@ -219,6 +223,7 @@ mod tests {
             PlanTier::Max5x,
             limits,
             0,
+            None,
             at("2026-06-09T02:00:00Z"),
         );
         assert_eq!(snap.source, DataSource::Hybrid);
@@ -240,6 +245,7 @@ mod tests {
             PlanTier::Pro,
             limits,
             3,
+            None,
             at("2026-06-09T02:00:00Z"),
         );
         assert!(snap.warnings.iter().any(|w| w.contains("3 transcript")));

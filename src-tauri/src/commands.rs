@@ -1,7 +1,7 @@
 //! Tauri IPC commands. All return `Result<_, AppError>`; errors are serialized
 //! to a `{kind, message}` shape that never contains credential material.
 
-use tauri::{AppHandle, Emitter, Manager, State};
+use tauri::{AppHandle, Emitter, Manager, State, WebviewUrl, WebviewWindow, WebviewWindowBuilder};
 use tauri_plugin_autostart::ManagerExt;
 
 use crate::config::{self, Settings};
@@ -91,13 +91,38 @@ pub fn toggle_window(app: AppHandle) -> AppResult<()> {
     Ok(())
 }
 
+/// Hide the settings window instead of destroying it on close, so it keeps its
+/// state. Best-effort: `prevent_close` isn't fully reliable on all platforms, so
+/// `open_settings_window` also recreates the window if it ends up destroyed.
+pub(crate) fn attach_hide_on_close(win: &WebviewWindow) {
+    let w = win.clone();
+    win.on_window_event(move |event| {
+        if let tauri::WindowEvent::CloseRequested { api, .. } = event {
+            api.prevent_close();
+            let _ = w.hide();
+        }
+    });
+}
+
 #[tauri::command]
 pub fn open_settings_window(app: AppHandle) -> AppResult<()> {
-    let win = app
-        .get_webview_window("settings")
-        .ok_or_else(|| AppError::Other("settings window missing".into()))?;
-    let _ = win.unminimize(); // restore if the user minimized it
-    let _ = win.show();
+    // If the window still exists (hidden or minimized), just reveal it.
+    if let Some(win) = app.get_webview_window("settings") {
+        let _ = win.unminimize();
+        let _ = win.show();
+        let _ = win.set_focus();
+        return Ok(());
+    }
+
+    // Otherwise it was destroyed on a previous close — recreate it. This makes
+    // the gear button work reliably regardless of platform close behavior.
+    let win = WebviewWindowBuilder::new(&app, "settings", WebviewUrl::App("settings.html".into()))
+        .title("Settings — Claude Token Monitor")
+        .inner_size(420.0, 520.0)
+        .resizable(true)
+        .build()
+        .map_err(|e| AppError::Other(format!("failed to create settings window: {e}")))?;
+    attach_hide_on_close(&win);
     let _ = win.set_focus();
     Ok(())
 }

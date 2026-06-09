@@ -49,6 +49,14 @@ export interface CostStats {
   totalUsd: number;
 }
 
+export interface ContextStatus {
+  used: number;
+  limit: number;
+  percentUsed: number;
+  remaining: number;
+  model: string;
+}
+
 export interface UsageSnapshot {
   generatedAt: string;
   source: DataSource;
@@ -61,6 +69,7 @@ export interface UsageSnapshot {
   perModel: ModelUsage[];
   burn: BurnStats;
   cost: CostStats;
+  context: ContextStatus | null;
   warnings: string[];
 }
 
@@ -69,6 +78,7 @@ export interface Settings {
   useApi: boolean;
   planOverride: PlanTier | null;
   planLimitOverrides: { fiveHourTokens: number; sevenDayTokens: number } | null;
+  contextLimitOverride: number | null;
   writeBackTokens: boolean;
   alwaysOnTop: boolean;
   autostart: boolean;

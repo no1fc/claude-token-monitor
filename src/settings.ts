@@ -53,6 +53,10 @@ function render(s: Settings) {
         <span>7-day limit</span>
         <input id="lim7" type="number" min="0" value="${s.planLimitOverrides?.sevenDayTokens ?? ""}" placeholder="auto" />
       </label>
+      <label class="row">
+        <span>Context window</span>
+        <input id="ctxLimit" type="number" min="0" value="${s.contextLimitOverride ?? ""}" placeholder="auto (e.g. 1000000)" />
+      </label>
     </fieldset>
     <label class="row">
       <span>Opacity</span>
@@ -101,6 +105,7 @@ async function save(prev: Settings) {
     autostart: (document.getElementById("autostart") as HTMLInputElement).checked,
     planOverride: planVal === "" ? null : planVal,
     planLimitOverrides: overrides,
+    contextLimitOverride: num("ctxLimit"),
     opacity: Number((document.getElementById("opacity") as HTMLInputElement).value),
     theme: (document.getElementById("theme") as HTMLSelectElement).value,
   };

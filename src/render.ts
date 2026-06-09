@@ -1,6 +1,6 @@
 // Render the widget DOM from a UsageSnapshot. No framework — plain DOM strings.
 
-import type { UsageSnapshot, WindowStatus } from "./types";
+import type { ContextStatus, UsageSnapshot, WindowStatus } from "./types";
 import {
   ago,
   clock,
@@ -45,6 +45,24 @@ function gauge(title: string, w: WindowStatus): string {
     </div>`;
 }
 
+function contextGauge(c: ContextStatus | null): string {
+  if (!c) return "";
+  const p = c.percentUsed;
+  const lvl = level(p);
+  return `
+    <div class="gauge">
+      <div class="gauge-head">
+        <span class="gauge-title">CONTEXT · ${esc(modelShort(c.model))}</span>
+        <span class="gauge-pct ${lvl}">${percent(p)}</span>
+      </div>
+      <div class="bar"><div class="fill ${lvl}" style="width:${Math.min(100, p)}%"></div></div>
+      <div class="gauge-sub">
+        <span>${compact(c.remaining)} left</span>
+        <span>${compact(c.used)} / ${compact(c.limit)}</span>
+      </div>
+    </div>`;
+}
+
 function perModelRows(s: UsageSnapshot): string {
   if (s.perModel.length === 0) return "";
   const rows = s.perModel
@@ -81,6 +99,7 @@ export function renderSnapshot(root: HTMLElement, s: UsageSnapshot): void {
     ${warn}
     ${gauge("5-HOUR", s.fiveHour)}
     ${gauge("WEEKLY", s.sevenDay)}
+    ${contextGauge(s.context)}
     <div class="stats">
       <div class="stat"><span>Burn</span><span>${compact(s.burn.tokensPerMin)}/min · ${burnEta}</span></div>
       <div class="stat"><span>Cost</span><span>${usd(s.cost.sessionUsd)} sess · ${usd(s.cost.sevenDayUsd)} wk</span></div>

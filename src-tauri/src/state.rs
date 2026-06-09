@@ -98,6 +98,7 @@ impl AppState {
             tier,
             limits,
             outcome.parse_failures,
+            settings.context_limit_override,
             now,
         );
 

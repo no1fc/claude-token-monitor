@@ -16,6 +16,8 @@ pub struct Settings {
     pub use_api: bool,
     pub plan_override: Option<PlanTier>,
     pub plan_limit_overrides: Option<PlanLimits>,
+    /// Override the auto-detected context-window size (tokens). None = auto.
+    pub context_limit_override: Option<u64>,
     pub write_back_tokens: bool,
     pub always_on_top: bool,
     /// Launch the app automatically when the user logs in.
@@ -32,6 +34,7 @@ impl Default for Settings {
             use_api: true,
             plan_override: None,
             plan_limit_overrides: None,
+            context_limit_override: None,
             write_back_tokens: false,
             always_on_top: true,
             autostart: false,

@@ -5,5 +5,6 @@
 pub mod aggregate;
 pub mod blocks;
 pub mod burn_rate;
+pub mod context;
 pub mod pricing;
 pub mod windows;
