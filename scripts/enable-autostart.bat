@@ -30,6 +30,13 @@ powershell -NoProfile -ExecutionPolicy Bypass -Command ^
   "$s.Save();" ^
   "Write-Host ('Autostart enabled -> ' + $lnk)"
 
+if errorlevel 1 (
+    echo.
+    echo [ERROR] Failed to create the Startup shortcut.
+    pause
+    exit /b 1
+)
+
 echo.
 echo The app will now launch automatically when you sign in.
 pause
