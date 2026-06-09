@@ -19,11 +19,13 @@ export function usd(n: number): string {
   return `$${Math.round(n).toLocaleString()}`;
 }
 
-/** Seconds -> "Hh Mm" or "Mm" (for "resets in" countdowns). */
+/** Seconds -> "Dd Hh Mm" / "Hh Mm" / "Mm" (for "resets in" countdowns). */
 export function duration(secs: number): string {
   if (secs <= 0) return "now";
-  const h = Math.floor(secs / 3600);
+  const d = Math.floor(secs / 86400);
+  const h = Math.floor((secs % 86400) / 3600);
   const m = Math.floor((secs % 3600) / 60);
+  if (d > 0) return `${d}d ${h}h ${m}m`;
   if (h > 0) return `${h}h ${m}m`;
   if (m > 0) return `${m}m`;
   return `${secs}s`;
