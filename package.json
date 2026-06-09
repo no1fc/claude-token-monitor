@@ -1,6 +1,6 @@
 {
   "name": "claude-token-monitor",
-  "version": "0.1.4",
+  "version": "0.2.0",
   "description": "Cross-platform always-on-top overlay that shows remaining Claude Code token quota (5-hour and 7-day windows).",
   "type": "module",
   "scripts": {
