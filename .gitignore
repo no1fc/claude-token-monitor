@@ -30,5 +30,5 @@ desktop.ini
 .vscode/
 *.swp
 
-# Claude Code — keep shared project config, ignore personal/local overrides
-.claude/settings.local.json
+# Claude Code — local project config (not published)
+.claude/

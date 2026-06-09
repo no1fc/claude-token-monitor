@@ -165,9 +165,9 @@ The Tauri layer (`commands`, `state`, `refresher`, `watcher`) orchestrates it an
 `usage://update` events to the frontend.
 
 **Contributor guide:** see [`CLAUDE.md`](CLAUDE.md) for the architecture map, conventions,
-and change recipes. Project workflows are codified as skills in
-[`.claude/skills/`](.claude/skills) — `ctm-dev` (build/run/verify), `ctm-add-metric`
-(add a tracked field end-to-end), and `ctm-release` (cut a cross-platform release).
+and change recipes. (If you use Claude Code, local project-workflow skills live under
+`.claude/skills/` — `ctm-dev`, `ctm-add-metric`, `ctm-release` — they are not published to
+the repo.)
 
 ---
 
