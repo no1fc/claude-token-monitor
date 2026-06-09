@@ -83,7 +83,22 @@ Bundles are written to `src-tauri/target/release/bundle/`.
 - **Tray icon:** left-click toggles show/hide; right-click for
   Show/Hide · Force refresh · Settings · Quit.
 - **Settings:** refresh interval (min 60 s), live-API toggle, plan + limit overrides,
-  always-on-top, opacity, theme. Saved to your OS config dir.
+  always-on-top, **start on login**, opacity, theme. Saved to your OS config dir.
+
+### Run instantly & auto-start (Windows)
+
+Convenience scripts live in [`scripts/`](scripts):
+
+| Script | What it does |
+|--------|--------------|
+| `scripts\run.bat` | Double-click to launch the built app instantly (falls back to dev mode if not yet built). |
+| `scripts\enable-autostart.bat` | Adds the app to the Windows **Startup** folder so it launches at login. |
+| `scripts\disable-autostart.bat` | Removes that Startup entry. |
+
+**Auto-start (all platforms):** open **Settings → "Start automatically on system login"**.
+This is the recommended, cross-platform way (Windows registry / macOS LaunchAgent / Linux
+`.desktop` autostart) and works with the installed app. Running both the in-app toggle and
+the batch script is safe — the app is single-instance and won't open twice.
 
 ---
 

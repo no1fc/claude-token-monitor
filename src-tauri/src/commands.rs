@@ -2,6 +2,7 @@
 //! to a `{kind, message}` shape that never contains credential material.
 
 use tauri::{AppHandle, Emitter, Manager, State};
+use tauri_plugin_autostart::ManagerExt;
 
 use crate::config::{self, Settings};
 use crate::error::{AppError, AppResult};
@@ -48,6 +49,14 @@ pub async fn update_settings(
     if let Some(win) = app.get_webview_window("main") {
         let _ = win.set_always_on_top(sanitized.always_on_top);
     }
+
+    // Apply OS autostart registration.
+    let autolaunch = app.autolaunch();
+    let _ = if sanitized.autostart {
+        autolaunch.enable()
+    } else {
+        autolaunch.disable()
+    };
 
     // Rebuild so changes (plan, api toggle) reflect right away.
     let snap = state.build_snapshot().await;

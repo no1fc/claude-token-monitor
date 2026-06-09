@@ -18,6 +18,8 @@ pub struct Settings {
     pub plan_limit_overrides: Option<PlanLimits>,
     pub write_back_tokens: bool,
     pub always_on_top: bool,
+    /// Launch the app automatically when the user logs in.
+    pub autostart: bool,
     pub opacity: f64,
     pub theme: String,
     pub currency: String,
@@ -32,6 +34,7 @@ impl Default for Settings {
             plan_limit_overrides: None,
             write_back_tokens: false,
             always_on_top: true,
+            autostart: false,
             opacity: 1.0,
             theme: "dark".to_string(),
             currency: "USD".to_string(),

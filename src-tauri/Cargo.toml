@@ -1,6 +1,6 @@
 [package]
 name = "claude-token-monitor"
-version = "0.1.1"
+version = "0.1.2"
 description = "Always-on-top overlay showing remaining Claude Code token quota."
 authors = ["you"]
 edition = "2021"
@@ -22,6 +22,8 @@ tauri-build = { version = "2", features = [] }
 [dependencies]
 tauri = { version = "2", features = ["tray-icon", "image-png", "macos-private-api"] }
 tauri-plugin-window-state = "2"
+tauri-plugin-autostart = "2"
+tauri-plugin-single-instance = "2"
 
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"

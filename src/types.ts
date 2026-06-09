@@ -71,6 +71,7 @@ export interface Settings {
   planLimitOverrides: { fiveHourTokens: number; sevenDayTokens: number } | null;
   writeBackTokens: boolean;
   alwaysOnTop: boolean;
+  autostart: boolean;
   opacity: number;
   theme: string;
   currency: string;

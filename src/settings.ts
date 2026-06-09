@@ -35,6 +35,10 @@ function render(s: Settings) {
       <input id="alwaysOnTop" type="checkbox" ${s.alwaysOnTop ? "checked" : ""} />
       <span>Always on top</span>
     </label>
+    <label class="row checkbox">
+      <input id="autostart" type="checkbox" ${s.autostart ? "checked" : ""} />
+      <span>Start automatically on system login</span>
+    </label>
     <label class="row">
       <span>Plan</span>
       <select id="plan">${planOpts}</select>
@@ -94,6 +98,7 @@ async function save(prev: Settings) {
     useApi: (document.getElementById("useApi") as HTMLInputElement).checked,
     alwaysOnTop: (document.getElementById("alwaysOnTop") as HTMLInputElement)
       .checked,
+    autostart: (document.getElementById("autostart") as HTMLInputElement).checked,
     planOverride: planVal === "" ? null : planVal,
     planLimitOverrides: overrides,
     opacity: Number((document.getElementById("opacity") as HTMLInputElement).value),

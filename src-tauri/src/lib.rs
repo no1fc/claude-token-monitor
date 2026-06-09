@@ -19,6 +19,7 @@ pub mod watcher;
 use tauri::menu::{MenuBuilder, MenuItemBuilder};
 use tauri::tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent};
 use tauri::{Emitter, Manager};
+use tauri_plugin_autostart::{MacosLauncher, ManagerExt};
 
 use state::AppState;
 
@@ -75,6 +76,19 @@ fn build_tray(app: &tauri::App) -> tauri::Result<()> {
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
+        // single-instance MUST be registered first: a second launch (e.g. from
+        // autostart + manual run) focuses the existing widget instead of opening
+        // a duplicate.
+        .plugin(tauri_plugin_single_instance::init(|app, _args, _cwd| {
+            if let Some(win) = app.get_webview_window("main") {
+                let _ = win.show();
+                let _ = win.set_focus();
+            }
+        }))
+        .plugin(tauri_plugin_autostart::init(
+            MacosLauncher::LaunchAgent,
+            None,
+        ))
         .plugin(tauri_plugin_window_state::Builder::default().build())
         .manage(AppState::new())
         .invoke_handler(tauri::generate_handler![
@@ -95,6 +109,14 @@ pub fn run() {
             if let Some(win) = app.get_webview_window("main") {
                 let _ = win.set_always_on_top(settings.always_on_top);
             }
+
+            // Sync OS autostart registration with the saved preference.
+            let autolaunch = app.autolaunch();
+            let _ = if settings.autostart {
+                autolaunch.enable()
+            } else {
+                autolaunch.disable()
+            };
 
             refresher::spawn(app.handle().clone());
             watcher::spawn(app.handle().clone());
