@@ -3,6 +3,7 @@
 > A tiny, always-on-top desktop overlay that shows how much of your **Claude Code**
 > token quota remains — at a glance, without running `/usage` in the terminal.
 
+[![CI](https://github.com/no1fc/claude-token-monitor/actions/workflows/ci.yml/badge.svg)](https://github.com/no1fc/claude-token-monitor/actions/workflows/ci.yml)
 ![platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-blue)
 ![stack](https://img.shields.io/badge/built%20with-Tauri%20v2%20%2B%20Rust-orange)
 ![license](https://img.shields.io/badge/license-MIT-green)

@@ -77,7 +77,10 @@ const PRO_7D: u64 = 130_000_000;
 
 pub fn default_limits(tier: PlanTier) -> PlanLimits {
     match tier {
-        PlanTier::Pro => PlanLimits { five_hour_tokens: PRO_5H, seven_day_tokens: PRO_7D },
+        PlanTier::Pro => PlanLimits {
+            five_hour_tokens: PRO_5H,
+            seven_day_tokens: PRO_7D,
+        },
         PlanTier::Max5x => PlanLimits {
             five_hour_tokens: PRO_5H * 5,
             seven_day_tokens: PRO_7D * 5,
@@ -86,7 +89,10 @@ pub fn default_limits(tier: PlanTier) -> PlanLimits {
             five_hour_tokens: PRO_5H * 20,
             seven_day_tokens: PRO_7D * 20,
         },
-        PlanTier::Team => PlanLimits { five_hour_tokens: PRO_5H, seven_day_tokens: PRO_7D },
+        PlanTier::Team => PlanLimits {
+            five_hour_tokens: PRO_5H,
+            seven_day_tokens: PRO_7D,
+        },
         PlanTier::Unknown => PlanLimits {
             five_hour_tokens: PRO_5H * 5,
             seven_day_tokens: PRO_7D * 5,
@@ -127,9 +133,15 @@ mod tests {
 
     #[test]
     fn override_wins_over_default() {
-        let ov = PlanLimits { five_hour_tokens: 1, seven_day_tokens: 2 };
+        let ov = PlanLimits {
+            five_hour_tokens: 1,
+            seven_day_tokens: 2,
+        };
         assert_eq!(resolve_limits(PlanTier::Max5x, Some(ov)), ov);
-        assert_eq!(resolve_limits(PlanTier::Pro, None), default_limits(PlanTier::Pro));
+        assert_eq!(
+            resolve_limits(PlanTier::Pro, None),
+            default_limits(PlanTier::Pro)
+        );
     }
 
     #[test]

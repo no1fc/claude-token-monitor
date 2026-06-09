@@ -65,8 +65,8 @@ pub fn load() -> Settings {
 
 /// Persist settings atomically (write temp then rename).
 pub fn save(settings: &Settings) -> AppResult<()> {
-    let dir = crate::paths::settings_dir()
-        .ok_or_else(|| AppError::Config("no config dir".into()))?;
+    let dir =
+        crate::paths::settings_dir().ok_or_else(|| AppError::Config("no config dir".into()))?;
     std::fs::create_dir_all(&dir)?;
     let path = dir.join("settings.json");
     let tmp = dir.join("settings.json.tmp");
@@ -95,14 +95,22 @@ mod tests {
 
     #[test]
     fn sanitize_enforces_min_interval_and_opacity() {
-        let s = Settings { refresh_interval_secs: 5, opacity: 5.0, ..Default::default() }.sanitized();
+        let s = Settings {
+            refresh_interval_secs: 5,
+            opacity: 5.0,
+            ..Default::default()
+        }
+        .sanitized();
         assert_eq!(s.refresh_interval_secs, MIN_REFRESH_SECS);
         assert_eq!(s.opacity, 1.0);
     }
 
     #[test]
     fn override_tier_wins() {
-        let s = Settings { plan_override: Some(PlanTier::Max20x), ..Default::default() };
+        let s = Settings {
+            plan_override: Some(PlanTier::Max20x),
+            ..Default::default()
+        };
         assert_eq!(effective_tier(&s, PlanTier::Pro), PlanTier::Max20x);
         let s2 = Settings::default();
         assert_eq!(effective_tier(&s2, PlanTier::Pro), PlanTier::Pro);

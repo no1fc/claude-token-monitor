@@ -61,14 +61,21 @@ mod tests {
 
     fn ev(ts: &str, model: &str, input: u64) -> UsageEvent {
         UsageEvent {
-            ts: DateTime::parse_from_rfc3339(ts).unwrap().with_timezone(&Utc),
+            ts: DateTime::parse_from_rfc3339(ts)
+                .unwrap()
+                .with_timezone(&Utc),
             session_id: Some("s1".into()),
             model: model.into(),
-            tokens: TokenBreakdown { input, ..Default::default() },
+            tokens: TokenBreakdown {
+                input,
+                ..Default::default()
+            },
         }
     }
     fn at(ts: &str) -> DateTime<Utc> {
-        DateTime::parse_from_rfc3339(ts).unwrap().with_timezone(&Utc)
+        DateTime::parse_from_rfc3339(ts)
+            .unwrap()
+            .with_timezone(&Utc)
     }
 
     #[test]

@@ -20,14 +20,26 @@ pub struct Pricing {
 pub fn model_pricing(model: &str) -> Pricing {
     let m = model.to_ascii_lowercase();
     if m.contains("opus") {
-        Pricing { input: 15.0, output: 75.0 }
+        Pricing {
+            input: 15.0,
+            output: 75.0,
+        }
     } else if m.contains("sonnet") {
-        Pricing { input: 3.0, output: 15.0 }
+        Pricing {
+            input: 3.0,
+            output: 15.0,
+        }
     } else if m.contains("haiku") {
-        Pricing { input: 1.0, output: 5.0 }
+        Pricing {
+            input: 1.0,
+            output: 5.0,
+        }
     } else {
         // Conservative default for unknown models: Sonnet-class rates.
-        Pricing { input: 3.0, output: 15.0 }
+        Pricing {
+            input: 3.0,
+            output: 15.0,
+        }
     }
 }
 
@@ -47,21 +59,38 @@ mod tests {
 
     #[test]
     fn opus_rates_applied() {
-        let t = TokenBreakdown { input: 1_000_000, output: 0, cache_creation: 0, cache_read: 0 };
+        let t = TokenBreakdown {
+            input: 1_000_000,
+            output: 0,
+            cache_creation: 0,
+            cache_read: 0,
+        };
         assert!((cost("claude-opus-4-6", &t) - 15.0).abs() < 1e-9);
     }
 
     #[test]
     fn output_more_expensive_than_input() {
-        let inp = TokenBreakdown { input: 1_000_000, ..Default::default() };
-        let out = TokenBreakdown { output: 1_000_000, ..Default::default() };
+        let inp = TokenBreakdown {
+            input: 1_000_000,
+            ..Default::default()
+        };
+        let out = TokenBreakdown {
+            output: 1_000_000,
+            ..Default::default()
+        };
         assert!(cost("claude-sonnet-4-6", &out) > cost("claude-sonnet-4-6", &inp));
     }
 
     #[test]
     fn cache_write_and_read_multipliers() {
-        let write = TokenBreakdown { cache_creation: 1_000_000, ..Default::default() };
-        let read = TokenBreakdown { cache_read: 1_000_000, ..Default::default() };
+        let write = TokenBreakdown {
+            cache_creation: 1_000_000,
+            ..Default::default()
+        };
+        let read = TokenBreakdown {
+            cache_read: 1_000_000,
+            ..Default::default()
+        };
         // sonnet input = 3.0 -> write 3.75, read 0.30
         assert!((cost("claude-sonnet-4-6", &write) - 3.75).abs() < 1e-9);
         assert!((cost("claude-sonnet-4-6", &read) - 0.30).abs() < 1e-9);
@@ -69,7 +98,10 @@ mod tests {
 
     #[test]
     fn unknown_model_defaults_to_sonnet() {
-        let t = TokenBreakdown { input: 1_000_000, ..Default::default() };
+        let t = TokenBreakdown {
+            input: 1_000_000,
+            ..Default::default()
+        };
         assert!((cost("some-future-model", &t) - 3.0).abs() < 1e-9);
     }
 }

@@ -1,6 +1,6 @@
 [package]
 name = "claude-token-monitor"
-version = "0.1.0"
+version = "0.1.1"
 description = "Always-on-top overlay showing remaining Claude Code token quota."
 authors = ["you"]
 edition = "2021"

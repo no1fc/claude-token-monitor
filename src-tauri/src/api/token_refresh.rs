@@ -24,10 +24,7 @@ pub fn parse_refresh(content: &str) -> AppResult<RefreshedToken> {
 }
 
 /// Perform the live refresh request.
-pub async fn refresh(
-    client: &reqwest::Client,
-    refresh_token: &str,
-) -> AppResult<RefreshedToken> {
+pub async fn refresh(client: &reqwest::Client, refresh_token: &str) -> AppResult<RefreshedToken> {
     let body = serde_json::json!({
         "grant_type": "refresh_token",
         "refresh_token": refresh_token,
@@ -43,7 +40,10 @@ pub async fn refresh(
 
     match resp.status().as_u16() {
         200 => {
-            let text = resp.text().await.map_err(|e| AppError::Api(e.to_string()))?;
+            let text = resp
+                .text()
+                .await
+                .map_err(|e| AppError::Api(e.to_string()))?;
             parse_refresh(&text)
         }
         401 | 403 => Err(AppError::Unauthorized),

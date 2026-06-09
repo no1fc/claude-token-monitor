@@ -82,7 +82,9 @@ mod tests {
     use super::*;
 
     fn at(ts: &str) -> DateTime<Utc> {
-        DateTime::parse_from_rfc3339(ts).unwrap().with_timezone(&Utc)
+        DateTime::parse_from_rfc3339(ts)
+            .unwrap()
+            .with_timezone(&Utc)
     }
 
     #[test]

@@ -130,11 +130,7 @@ impl AppState {
         creds.access_token().to_string()
     }
 
-    async fn refresh_and_retry(
-        &self,
-        creds: &Credentials,
-        ua: &str,
-    ) -> Option<UsageApiResponse> {
+    async fn refresh_and_retry(&self, creds: &Credentials, ua: &str) -> Option<UsageApiResponse> {
         let refresh_token = creds.refresh_token()?;
         let refreshed = api::token_refresh::refresh(&self.http, refresh_token)
             .await

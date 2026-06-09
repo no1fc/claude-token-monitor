@@ -146,10 +146,7 @@ pub struct UsageSnapshot {
 }
 
 /// serde helper: serialize a `TokenBreakdown` with the computed `total` field.
-fn ser_tokens<S: serde::Serializer>(
-    t: &TokenBreakdown,
-    s: S,
-) -> Result<S::Ok, S::Error> {
+fn ser_tokens<S: serde::Serializer>(t: &TokenBreakdown, s: S) -> Result<S::Ok, S::Error> {
     TokenBreakdownWire(*t).serialize(s)
 }
 
@@ -170,10 +167,28 @@ mod tests {
 
     #[test]
     fn plus_is_field_wise_and_nonmutating() {
-        let a = TokenBreakdown { input: 1, output: 2, cache_creation: 3, cache_read: 4 };
-        let b = TokenBreakdown { input: 10, output: 20, cache_creation: 30, cache_read: 40 };
+        let a = TokenBreakdown {
+            input: 1,
+            output: 2,
+            cache_creation: 3,
+            cache_read: 4,
+        };
+        let b = TokenBreakdown {
+            input: 10,
+            output: 20,
+            cache_creation: 30,
+            cache_read: 40,
+        };
         let c = a.plus(b);
-        assert_eq!(c, TokenBreakdown { input: 11, output: 22, cache_creation: 33, cache_read: 44 });
+        assert_eq!(
+            c,
+            TokenBreakdown {
+                input: 11,
+                output: 22,
+                cache_creation: 33,
+                cache_read: 44
+            }
+        );
         // originals untouched
         assert_eq!(a.input, 1);
         assert_eq!(b.input, 10);
@@ -181,7 +196,12 @@ mod tests {
 
     #[test]
     fn token_breakdown_wire_includes_total() {
-        let t = TokenBreakdown { input: 1, output: 2, cache_creation: 3, cache_read: 4 };
+        let t = TokenBreakdown {
+            input: 1,
+            output: 2,
+            cache_creation: 3,
+            cache_read: 4,
+        };
         let json = serde_json::to_value(TokenBreakdownWire(t)).unwrap();
         assert_eq!(json["total"], 10);
         assert_eq!(json["cacheCreation"], 3);

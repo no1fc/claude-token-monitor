@@ -61,7 +61,10 @@ pub async fn fetch_usage(
 
     match resp.status().as_u16() {
         200 => {
-            let text = resp.text().await.map_err(|e| AppError::Api(e.to_string()))?;
+            let text = resp
+                .text()
+                .await
+                .map_err(|e| AppError::Api(e.to_string()))?;
             parse_usage(&text)
         }
         401 => Err(AppError::Unauthorized),

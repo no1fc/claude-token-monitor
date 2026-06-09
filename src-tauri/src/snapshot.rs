@@ -45,7 +45,11 @@ pub fn build(
 
     // --- merge with API authoritative values ---
     let five_hour = merge_window(five_est, api.and_then(|a| a.five_hour.as_ref()), now);
-    let seven_day = merge_window(seven_est.clone(), api.and_then(|a| a.seven_day.as_ref()), now);
+    let seven_day = merge_window(
+        seven_est.clone(),
+        api.and_then(|a| a.seven_day.as_ref()),
+        now,
+    );
     let seven_day_opus = api
         .and_then(|a| a.seven_day_opus.as_ref())
         .map(|u| windows::from_api(u.utilization, u.resets_at, now, None));
@@ -117,7 +121,9 @@ pub fn build(
     // --- warnings ---
     let mut warnings = Vec::new();
     if parse_failures > 0 {
-        warnings.push(format!("{parse_failures} transcript line(s) could not be parsed"));
+        warnings.push(format!(
+            "{parse_failures} transcript line(s) could not be parsed"
+        ));
     }
     if api.is_none() {
         warnings.push("Usage API unavailable — showing local estimates".to_string());
@@ -150,21 +156,38 @@ mod tests {
 
     fn ev(ts: &str, model: &str, input: u64) -> UsageEvent {
         UsageEvent {
-            ts: DateTime::parse_from_rfc3339(ts).unwrap().with_timezone(&Utc),
+            ts: DateTime::parse_from_rfc3339(ts)
+                .unwrap()
+                .with_timezone(&Utc),
             session_id: Some("s1".into()),
             model: model.into(),
-            tokens: TokenBreakdown { input, ..Default::default() },
+            tokens: TokenBreakdown {
+                input,
+                ..Default::default()
+            },
         }
     }
     fn at(ts: &str) -> DateTime<Utc> {
-        DateTime::parse_from_rfc3339(ts).unwrap().with_timezone(&Utc)
+        DateTime::parse_from_rfc3339(ts)
+            .unwrap()
+            .with_timezone(&Utc)
     }
 
     #[test]
     fn jsonl_only_source_and_estimates() {
         let events = vec![ev("2026-06-09T01:00:00Z", "claude-opus-4-6", 50)];
-        let limits = PlanLimits { five_hour_tokens: 100, seven_day_tokens: 1000 };
-        let snap = build(&events, None, PlanTier::Max5x, limits, 0, at("2026-06-09T02:00:00Z"));
+        let limits = PlanLimits {
+            five_hour_tokens: 100,
+            seven_day_tokens: 1000,
+        };
+        let snap = build(
+            &events,
+            None,
+            PlanTier::Max5x,
+            limits,
+            0,
+            at("2026-06-09T02:00:00Z"),
+        );
         assert_eq!(snap.source, DataSource::Jsonl);
         assert!(snap.five_hour.estimated);
         assert_eq!(snap.five_hour.percent_used, 50.0);
@@ -175,16 +198,29 @@ mod tests {
     #[test]
     fn api_overrides_percent_keeps_tokens() {
         let events = vec![ev("2026-06-09T01:00:00Z", "claude-opus-4-6", 50)];
-        let limits = PlanLimits { five_hour_tokens: 100, seven_day_tokens: 1000 };
+        let limits = PlanLimits {
+            five_hour_tokens: 100,
+            seven_day_tokens: 1000,
+        };
         let api = UsageApiResponse {
             five_hour: Some(WindowUtil {
                 utilization: 80.0,
                 resets_at: Some(at("2026-06-09T06:00:00Z")),
             }),
-            seven_day: Some(WindowUtil { utilization: 10.0, resets_at: None }),
+            seven_day: Some(WindowUtil {
+                utilization: 10.0,
+                resets_at: None,
+            }),
             ..Default::default()
         };
-        let snap = build(&events, Some(&api), PlanTier::Max5x, limits, 0, at("2026-06-09T02:00:00Z"));
+        let snap = build(
+            &events,
+            Some(&api),
+            PlanTier::Max5x,
+            limits,
+            0,
+            at("2026-06-09T02:00:00Z"),
+        );
         assert_eq!(snap.source, DataSource::Hybrid);
         assert!(!snap.five_hour.estimated);
         assert_eq!(snap.five_hour.percent_used, 80.0); // API value, not 50
@@ -194,8 +230,18 @@ mod tests {
     #[test]
     fn parse_failures_surface_as_warning() {
         let events = vec![ev("2026-06-09T01:00:00Z", "claude-opus-4-6", 50)];
-        let limits = PlanLimits { five_hour_tokens: 100, seven_day_tokens: 1000 };
-        let snap = build(&events, None, PlanTier::Pro, limits, 3, at("2026-06-09T02:00:00Z"));
+        let limits = PlanLimits {
+            five_hour_tokens: 100,
+            seven_day_tokens: 1000,
+        };
+        let snap = build(
+            &events,
+            None,
+            PlanTier::Pro,
+            limits,
+            3,
+            at("2026-06-09T02:00:00Z"),
+        );
         assert!(snap.warnings.iter().any(|w| w.contains("3 transcript")));
     }
 }

@@ -23,10 +23,7 @@ pub async fn get_snapshot(state: State<'_, AppState>) -> AppResult<UsageSnapshot
 
 /// Rebuild immediately and push the result to all windows.
 #[tauri::command]
-pub async fn force_refresh(
-    app: AppHandle,
-    state: State<'_, AppState>,
-) -> AppResult<UsageSnapshot> {
+pub async fn force_refresh(app: AppHandle, state: State<'_, AppState>) -> AppResult<UsageSnapshot> {
     let snap = state.build_snapshot().await;
     let _ = app.emit(EVENT_UPDATE, &snap);
     Ok(snap)

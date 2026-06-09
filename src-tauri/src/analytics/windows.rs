@@ -25,11 +25,7 @@ fn remaining_secs(resets_at: Option<DateTime<Utc>>, now: DateTime<Utc>) -> i64 {
 }
 
 /// 5-hour window estimated from the active block.
-pub fn five_hour_estimated(
-    events: &[UsageEvent],
-    now: DateTime<Utc>,
-    limit: u64,
-) -> WindowStatus {
+pub fn five_hour_estimated(events: &[UsageEvent], now: DateTime<Utc>, limit: u64) -> WindowStatus {
     match active_block(events, now) {
         Some(b) => {
             let used = b.tokens.total();
@@ -60,16 +56,16 @@ pub fn five_hour_estimated(
 /// 7-day window estimated from a rolling sum of the last 7 days.
 /// `resets_at` is approximated as (oldest counted event + 7d) — when that usage
 /// begins to roll off. Precise resets come only from the API.
-pub fn seven_day_estimated(
-    events: &[UsageEvent],
-    now: DateTime<Utc>,
-    limit: u64,
-) -> WindowStatus {
+pub fn seven_day_estimated(events: &[UsageEvent], now: DateTime<Utc>, limit: u64) -> WindowStatus {
     let since = now - Duration::days(SEVEN_DAYS);
     let win = events_in_window(events, since, now);
     let used = sum_tokens(&win).total();
     let percent = pct(used, limit);
-    let resets_at = win.iter().map(|e| e.ts).min().map(|t| t + Duration::days(SEVEN_DAYS));
+    let resets_at = win
+        .iter()
+        .map(|e| e.ts)
+        .min()
+        .map(|t| t + Duration::days(SEVEN_DAYS));
     WindowStatus {
         percent_used: percent,
         remaining_percent: 100.0 - percent,
@@ -108,14 +104,21 @@ mod tests {
 
     fn ev(ts: &str, input: u64) -> UsageEvent {
         UsageEvent {
-            ts: DateTime::parse_from_rfc3339(ts).unwrap().with_timezone(&Utc),
+            ts: DateTime::parse_from_rfc3339(ts)
+                .unwrap()
+                .with_timezone(&Utc),
             session_id: Some("s1".into()),
             model: "claude-opus-4-6".into(),
-            tokens: TokenBreakdown { input, ..Default::default() },
+            tokens: TokenBreakdown {
+                input,
+                ..Default::default()
+            },
         }
     }
     fn at(ts: &str) -> DateTime<Utc> {
-        DateTime::parse_from_rfc3339(ts).unwrap().with_timezone(&Utc)
+        DateTime::parse_from_rfc3339(ts)
+            .unwrap()
+            .with_timezone(&Utc)
     }
 
     #[test]

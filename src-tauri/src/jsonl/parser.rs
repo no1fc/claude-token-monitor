@@ -118,7 +118,14 @@ mod tests {
 
     #[test]
     fn extracts_events_with_tokens() {
-        let content = line("2026-06-09T01:00:00.000Z", "r1", "m1", "claude-opus-4-6", 10, 20);
+        let content = line(
+            "2026-06-09T01:00:00.000Z",
+            "r1",
+            "m1",
+            "claude-opus-4-6",
+            10,
+            20,
+        );
         let outcome = parse_str(&content);
         assert_eq!(outcome.events.len(), 1);
         assert_eq!(outcome.events[0].tokens.input, 10);
@@ -128,23 +135,55 @@ mod tests {
 
     #[test]
     fn dedupes_by_request_and_message_id() {
-        let l = line("2026-06-09T01:00:00.000Z", "r1", "m1", "claude-opus-4-6", 10, 20);
+        let l = line(
+            "2026-06-09T01:00:00.000Z",
+            "r1",
+            "m1",
+            "claude-opus-4-6",
+            10,
+            20,
+        );
         let content = format!("{l}\n{l}"); // exact duplicate line
         let outcome = parse_str(&content);
-        assert_eq!(outcome.events.len(), 1, "duplicate (requestId, id) collapsed");
+        assert_eq!(
+            outcome.events.len(),
+            1,
+            "duplicate (requestId, id) collapsed"
+        );
     }
 
     #[test]
     fn keeps_distinct_messages() {
-        let a = line("2026-06-09T01:00:00.000Z", "r1", "m1", "claude-opus-4-6", 10, 20);
-        let b = line("2026-06-09T01:01:00.000Z", "r2", "m2", "claude-opus-4-6", 1, 2);
+        let a = line(
+            "2026-06-09T01:00:00.000Z",
+            "r1",
+            "m1",
+            "claude-opus-4-6",
+            10,
+            20,
+        );
+        let b = line(
+            "2026-06-09T01:01:00.000Z",
+            "r2",
+            "m2",
+            "claude-opus-4-6",
+            1,
+            2,
+        );
         let outcome = parse_str(&format!("{a}\n{b}"));
         assert_eq!(outcome.events.len(), 2);
     }
 
     #[test]
     fn skips_malformed_and_counts_failures() {
-        let good = line("2026-06-09T01:00:00.000Z", "r1", "m1", "claude-opus-4-6", 10, 20);
+        let good = line(
+            "2026-06-09T01:00:00.000Z",
+            "r1",
+            "m1",
+            "claude-opus-4-6",
+            10,
+            20,
+        );
         let content = format!("{good}\n{{not valid json\n\n");
         let outcome = parse_str(&content);
         assert_eq!(outcome.events.len(), 1);

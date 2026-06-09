@@ -33,7 +33,10 @@ impl std::fmt::Debug for Credentials {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("Credentials")
             .field("access_token", &"<redacted>")
-            .field("refresh_token", &self.refresh_token.as_ref().map(|_| "<redacted>"))
+            .field(
+                "refresh_token",
+                &self.refresh_token.as_ref().map(|_| "<redacted>"),
+            )
             .field("expires_at_ms", &self.expires_at_ms)
             .field("subscription_type", &self.subscription_type)
             .field("rate_limit_tier", &self.rate_limit_tier)
@@ -163,7 +166,10 @@ mod tests {
         let c = parse(SAMPLE).unwrap().unwrap();
         let dbg = format!("{c:?}");
         assert!(!dbg.contains(FAKE_ACCESS), "debug must not leak token");
-        assert!(!dbg.contains("test-refresh-token-value"), "debug must not leak refresh token");
+        assert!(
+            !dbg.contains("test-refresh-token-value"),
+            "debug must not leak refresh token"
+        );
         assert!(dbg.contains("<redacted>"));
     }
 
