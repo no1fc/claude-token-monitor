@@ -1,0 +1,21 @@
+{
+  "name": "claude-token-monitor",
+  "version": "0.1.0",
+  "description": "Cross-platform always-on-top overlay that shows remaining Claude Code token quota (5-hour and 7-day windows).",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "tauri": "tauri"
+  },
+  "dependencies": {
+    "@tauri-apps/api": "^2",
+    "@tauri-apps/plugin-window-state": "^2"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2",
+    "typescript": "^5.6.0",
+    "vite": "^5.4.0"
+  }
+}

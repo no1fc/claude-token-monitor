@@ -1,0 +1,47 @@
+[package]
+name = "claude-token-monitor"
+version = "0.1.0"
+description = "Always-on-top overlay showing remaining Claude Code token quota."
+authors = ["you"]
+edition = "2021"
+rust-version = "1.77"
+
+# The library exposes the pure-logic modules so they can be unit/integration tested
+# without the GUI, and provides the `run()` entrypoint the binary calls.
+[lib]
+name = "claude_token_monitor_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[[bin]]
+name = "claude-token-monitor"
+path = "src/main.rs"
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = ["tray-icon", "image-png", "macos-private-api"] }
+tauri-plugin-window-state = "2"
+
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+chrono = { version = "0.4", features = ["serde"] }
+dirs = "5"
+walkdir = "2"
+notify = "6"
+once_cell = "1"
+thiserror = "1"
+zeroize = "1"
+tokio = { version = "1", features = ["time", "sync", "rt-multi-thread", "macros"] }
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
+
+[features]
+# Allows building/testing on CI without bundling.
+custom-protocol = ["tauri/custom-protocol"]
+
+[profile.release]
+panic = "abort"
+codegen-units = 1
+lto = true
+opt-level = "s"
+strip = true

@@ -1,0 +1,273 @@
+:root {
+  --bg: rgba(22, 24, 28, 0.92);
+  --fg: #e6e8eb;
+  --muted: #9aa0a6;
+  --line: rgba(255, 255, 255, 0.08);
+  --ok: #46c66b;
+  --warn: #e6a23c;
+  --danger: #ef5350;
+  --accent: #c08a4a;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+/* Transparent so the rounded card floats as an overlay. */
+.widget-body {
+  background: transparent;
+  overflow: hidden;
+  user-select: none;
+}
+
+.widget {
+  background: var(--bg);
+  color: var(--fg);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 10px 12px;
+  margin: 4px;
+  font-size: 12px;
+  backdrop-filter: blur(8px);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex: 0 0 auto;
+}
+.dot.live {
+  background: var(--ok);
+  box-shadow: 0 0 6px var(--ok);
+}
+.dot.est {
+  background: var(--warn);
+}
+
+.plan {
+  font-weight: 600;
+  font-size: 11px;
+  letter-spacing: 0.3px;
+}
+
+.drag {
+  flex: 1 1 auto;
+  height: 18px;
+  cursor: grab;
+}
+
+.icon {
+  background: transparent;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+  padding: 2px 4px;
+  border-radius: 6px;
+}
+.icon:hover {
+  color: var(--fg);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.warnbar {
+  background: rgba(230, 162, 60, 0.14);
+  color: var(--warn);
+  border-radius: 6px;
+  padding: 3px 7px;
+  font-size: 10px;
+  margin-bottom: 8px;
+}
+
+.gauge {
+  margin-bottom: 9px;
+}
+.gauge-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 3px;
+}
+.gauge-title {
+  font-size: 10px;
+  letter-spacing: 0.8px;
+  color: var(--muted);
+}
+.gauge-pct {
+  font-weight: 700;
+  font-size: 13px;
+}
+.gauge-pct.ok {
+  color: var(--ok);
+}
+.gauge-pct.warn {
+  color: var(--warn);
+}
+.gauge-pct.danger {
+  color: var(--danger);
+}
+
+.bar {
+  height: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 4px;
+  overflow: hidden;
+}
+.fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.4s ease;
+}
+.fill.ok {
+  background: var(--ok);
+}
+.fill.warn {
+  background: var(--warn);
+}
+.fill.danger {
+  background: var(--danger);
+}
+
+.gauge-sub {
+  display: flex;
+  justify-content: space-between;
+  color: var(--muted);
+  font-size: 10px;
+  margin-top: 3px;
+}
+
+.stats {
+  border-top: 1px solid var(--line);
+  padding-top: 7px;
+  margin-top: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.stat {
+  display: flex;
+  justify-content: space-between;
+}
+.stat span:first-child {
+  color: var(--muted);
+}
+
+.models {
+  margin-top: 7px;
+  font-size: 11px;
+}
+.models summary {
+  cursor: pointer;
+  color: var(--muted);
+  font-size: 10px;
+}
+.model-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 2px 0 2px 8px;
+}
+
+.footer {
+  margin-top: 7px;
+  text-align: right;
+  color: var(--muted);
+  font-size: 9px;
+}
+
+.loading,
+.empty {
+  color: var(--muted);
+  text-align: center;
+  padding: 24px 8px;
+}
+
+/* ---------- Settings window ---------- */
+.settings-body {
+  background: #1b1d21;
+  color: var(--fg);
+  font-family: inherit;
+}
+.settings {
+  padding: 16px 20px;
+  max-width: 420px;
+}
+.settings h1 {
+  font-size: 16px;
+  margin: 0 0 14px;
+}
+.row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+  font-size: 13px;
+}
+.row.checkbox {
+  justify-content: flex-start;
+}
+.row input[type="number"],
+.row select {
+  width: 150px;
+  background: #25282d;
+  color: var(--fg);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 4px 6px;
+}
+.overrides {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 8px 12px;
+  margin: 8px 0;
+}
+.overrides legend {
+  color: var(--muted);
+  font-size: 11px;
+}
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 14px;
+}
+.actions button {
+  background: var(--accent);
+  color: #1b1d21;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 16px;
+  font-weight: 600;
+  cursor: pointer;
+}
+#status {
+  color: var(--ok);
+  font-size: 12px;
+}
+.note {
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.5;
+  margin-top: 14px;
+}
+.note code {
+  background: #25282d;
+  padding: 1px 4px;
+  border-radius: 4px;
+}
