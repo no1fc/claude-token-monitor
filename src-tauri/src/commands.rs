@@ -96,6 +96,7 @@ pub fn open_settings_window(app: AppHandle) -> AppResult<()> {
     let win = app
         .get_webview_window("settings")
         .ok_or_else(|| AppError::Other("settings window missing".into()))?;
+    let _ = win.unminimize(); // restore if the user minimized it
     let _ = win.show();
     let _ = win.set_focus();
     Ok(())

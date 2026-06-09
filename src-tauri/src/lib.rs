@@ -118,6 +118,18 @@ pub fn run() {
                 autolaunch.disable()
             };
 
+            // Keep the settings window alive across closes: hide instead of
+            // destroy so the gear button can always reopen it.
+            if let Some(settings_win) = app.get_webview_window("settings") {
+                let w = settings_win.clone();
+                settings_win.on_window_event(move |event| {
+                    if let tauri::WindowEvent::CloseRequested { api, .. } = event {
+                        api.prevent_close();
+                        let _ = w.hide();
+                    }
+                });
+            }
+
             refresher::spawn(app.handle().clone());
             watcher::spawn(app.handle().clone());
             Ok(())
